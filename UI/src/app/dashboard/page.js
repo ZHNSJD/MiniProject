@@ -6,13 +6,15 @@ import { supabase } from "../../lib/supabaseClient";
 
 export default function Dashboard() {
   const [isClient, setIsClient] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [emotion, setEmotion] = useState(null);
-  const [recommendation, setRecommendation] = useState("");
+  const [isChatting, setIsChatting] = useState(false);
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
   const dropdownRef = useRef(null);
+  const chatEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -29,21 +31,30 @@ export default function Dashboard() {
     fetchUser();
   }, []);
 
-  const handleAnalyzeEmotion = async () => {
-    setIsAnalyzing(true);
-    setRecommendation("");
+  const handleStartChatting = () => {
+    setIsChatting(true);
+    if (user) {
+      const userName = user.user_metadata?.full_name || user.email.split('@')[0];
+      const welcomeMessage = { text: `Hi ${userName}, how are you feeling today? 😊`, sender: "bot" };
+      setMessages([welcomeMessage]);
+    }
+  };
+  
 
-    setTimeout(async () => {
-      const detectedEmotion = "Stressed";
-      setEmotion(detectedEmotion);
-      const chatResponse = await fakeChatGPTResponse(detectedEmotion);
-      setRecommendation(chatResponse);
-      setIsAnalyzing(false);
-    }, 3000);
+  const handleSendMessage = async () => {
+    if (input.trim() === "") return;
+    const userMessage = { text: input, sender: "user" };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+    const chatResponse = await fakeChatGPTResponse(input);
+    const botMessage = { text: chatResponse, sender: "bot" };
+    setMessages((prev) => [...prev, botMessage]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fakeChatGPTResponse = async (emotion) => {
-    return `Based on your detected emotion (${emotion}), try listening to calm music or meditating.`;
+  const fakeChatGPTResponse = async (message) => {
+    return `You said: ${message}. Here's a calm suggestion: Take a deep breath and relax.`;
   };
 
   const handleLogout = async () => {
@@ -62,6 +73,12 @@ export default function Dashboard() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   if (!isClient) return null;
 
@@ -96,31 +113,37 @@ export default function Dashboard() {
       {/* Container */}
       <div className="bg-white/5 backdrop-blur-lg p-8 rounded-xl shadow-lg w-full max-w-2xl">
         <h1 className="text-2xl font-bold mb-4 text-white text-center">Emotion Detection Dashboard</h1>
-        
         <div className="w-full h-60 bg-white/20 flex items-center justify-center mb-6 rounded-lg">
           <span className="text-white/80">[ Video Feed Here ]</span>
         </div>
 
-        <Button 
-          onClick={handleAnalyzeEmotion} 
-          disabled={isAnalyzing}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
-        >
-          {isAnalyzing ? "Analyzing..." : "Start chatting"}
-        </Button>
-
-        {isAnalyzing && <p className="mt-2 text-white/80 text-center">Thinking...</p>}
-        
-        {emotion && (
-          <p className="mt-4 text-lg text-white text-center">
-            Detected Emotion: <strong>{emotion}</strong>
-          </p>
+        {!isChatting ? (
+          <Button 
+            onClick={handleStartChatting} 
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
+          >
+            Start chatting
+          </Button>
+        ) : (
+          <div className="w-full h-80 overflow-y-auto p-4 bg-white/20 rounded-lg" ref={chatContainerRef}>
+            {messages.map((msg, index) => (
+              <div key={index} className={`my-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                <span className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>{msg.text}</span>
+              </div>
+            ))}
+            <div ref={chatEndRef}></div>
+          </div>
         )}
-        
-        {recommendation && (
-          <div className="mt-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg">
-            <p className="text-white/80">ChatGPT Recommendation:</p>
-            <p className="text-blue-400 font-semibold">{recommendation}</p>
+        {isChatting && (
+          <div className="mt-4 flex gap-3">
+            <input 
+              type="text" 
+              className="flex-1 p-2 rounded-lg" 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+            />
+            <Button onClick={handleSendMessage} className="bg-blue-500 rounded-r-lg">Send</Button>
           </div>
         )}
       </div>
