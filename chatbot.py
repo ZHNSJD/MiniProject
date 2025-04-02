@@ -1,11 +1,12 @@
 import os
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
 
 
 def generate(user_input):
     # Get API key from environment variables
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not set in environment variables.")
 
