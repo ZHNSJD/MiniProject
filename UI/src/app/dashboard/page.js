@@ -9,13 +9,12 @@ export default function Dashboard() {
   const [isChatting, setIsChatting] = useState(false);
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const videoRef = useRef(null);  // 📌 Reference to the video feed
+  const videoRef = useRef(null);
   const chatEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const canvasRef = useRef(null);  // 📌 Reference for capturing screenshot
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -23,7 +22,7 @@ export default function Dashboard() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
-        const { data } = await supabase.storage.from('avatars').download(`${user.id}/avatar`);
+        const { data } = await supabase.storage.from("avatars").download(`${user.id}/avatar`);
         if (data) {
           setAvatarUrl(URL.createObjectURL(data));
         }
@@ -31,7 +30,6 @@ export default function Dashboard() {
     };
     fetchUser();
 
-    // 📌 Start webcam feed when component mounts
     navigator.mediaDevices.getUserMedia({ video: true })
       .then((stream) => {
         if (videoRef.current) {
@@ -50,42 +48,62 @@ export default function Dashboard() {
     }
   };
 
-  // 📌 Capture screenshot from webcam
   const captureScreenshot = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (video && canvas) {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL("image/jpeg");  // Return screenshot as base64
+      return canvas.toDataURL("image/jpeg");
     }
     return null;
   };
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
+
     const userMessage = { text: input, sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    const screenshot = captureScreenshot();  // 📌 Capture screenshot when sending message
+    const screenshot = captureScreenshot();
+    let detectedEmotion = "neutral";
 
-    // 📌 Send user input and screenshot to backend
-    const formData = new FormData();
-    formData.append("text", input);
-    if (screenshot) {
-      formData.append("image", screenshot);
+    try {
+      if (screenshot) {
+        const blob = await (await fetch(screenshot)).blob();
+        const imageFile = new File([blob], "screenshot.jpg", { type: "image/jpeg" });
+
+        const formData = new FormData();
+        formData.append("file", imageFile);
+
+        const emotionResponse = await fetch("http://localhost:8000/detect_emotion/", {
+          method: "POST",
+          body: formData,
+        });
+
+        const emotionData = await emotionResponse.json();
+        detectedEmotion = emotionData.detected_emotion || "neutral";
+      }
+    } catch (err) {
+      console.error("Emotion detection failed:", err);
     }
 
-    const response = await fetch("/api/process", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const chatResponse = await fetch("http://localhost:8000/chat/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_input: input, emotion: detectedEmotion }),
+      });
 
-    const { botResponse } = await response.json();
-    const botMessage = { text: botResponse, sender: "bot" };
-    setMessages((prev) => [...prev, botMessage]);
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const chatData = await chatResponse.json();
+      const botMessage = { text: chatData.bot_response, sender: "bot" };
+      setMessages((prev) => [...prev, botMessage]);
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (err) {
+      console.error("Chat request failed:", err);
+      setMessages((prev) => [...prev, { text: "Oops, something went wrong.", sender: "bot" }]);
+    }
   };
 
   if (!isClient) return null;
@@ -112,12 +130,10 @@ export default function Dashboard() {
       <div className="bg-white/5 backdrop-blur-lg p-8 rounded-xl shadow-lg w-full max-w-2xl">
         <h1 className="text-2xl font-bold mb-4 text-white text-center">Emotion Detection Dashboard</h1>
         
-        {/* 📌 Video feed */}
         <div className="w-full h-60 bg-white/20 flex items-center justify-center mb-6 rounded-lg">
           <video ref={videoRef} autoPlay playsInline className="w-full h-full"></video>
         </div>
 
-        {/* 📌 Hidden canvas for screenshot */}
         <canvas ref={canvasRef} width={640} height={480} style={{ display: "none" }}></canvas>
 
         {!isChatting ? (
@@ -131,7 +147,9 @@ export default function Dashboard() {
           <div className="w-full h-80 overflow-y-auto p-4 bg-white/20 rounded-lg" ref={chatContainerRef}>
             {messages.map((msg, index) => (
               <div key={index} className={`my-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                <span className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>{msg.text}</span>
+                <span className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
+                  {msg.text}
+                </span>
               </div>
             ))}
             <div ref={chatEndRef}></div>
