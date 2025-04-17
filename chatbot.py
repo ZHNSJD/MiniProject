@@ -4,7 +4,10 @@ from google.genai import types
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(dotenv_path='ui/.env.local')
+
+print(f"GEMINI_API_KEY: {os.getenv('GEMINI_API_KEY')}")
+
 
 def generate_chatbot_response(user_input: str, detected_emotion: str) -> str:
     """Generate chatbot response based on user input and detected emotion."""

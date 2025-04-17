@@ -53,11 +53,35 @@ export default function Dashboard() {
     const canvas = canvasRef.current;
     if (video && canvas) {
       const ctx = canvas.getContext("2d");
+      
+      // Draw the current video frame to the canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert the captured image to grayscale
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+  
+      for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i];     // Red
+        const g = pixels[i + 1]; // Green
+        const b = pixels[i + 2]; // Blue
+        
+        // Calculate grayscale value
+        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+  
+        // Set all three RGB values to the grayscale value
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = gray;
+      }
+  
+      // Put the modified image back onto the canvas
+      ctx.putImageData(imageData, 0, 0);
+  
+      // Return the grayscale image as a data URL
       return canvas.toDataURL("image/jpeg");
     }
     return null;
   };
+  
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;

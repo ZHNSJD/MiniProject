@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -8,8 +9,17 @@ from chatbot import generate_chatbot_response  # Import chatbot function
 
 app = FastAPI()
 
+# Add CORS middleware to allow requests from your frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Load the emotion detection model
-model = tf.keras.models.load_model("C:\Users\sidha\OneDrive\Desktop\Mini Project\MiniProject\stress_emotion_model_v2.h5")   #path to model here .h5 file
+model = tf.keras.models.load_model("C:/Users/Shreya Nithin/Desktop/mini/MiniProject/stress_emotion_model_v2.h5")
 
 # Define emotion labels (modify based on your model)
 emotion_labels = ["happy", "sad", "angry", "neutral", "fearful", "disgust", "surprised"]
