@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 # Load the emotion detection model
-model = tf.keras.models.load_model("C:/Users/Shreya Nithin/Desktop/mini/MiniProject/stress_emotion_model_v2.h5") #Change path to your path
+model = tf.keras.models.load_model(r"C:\Users\sidha\OneDrive\Desktop\Mini Project\MiniProject\stress_emotion_model_v2.h5") #Change path to your path
 
 # Define emotion labels (modify based on your model)
 emotion_labels = ["happy", "sad", "angry", "neutral", "fearful", "disgust", "surprised"]
