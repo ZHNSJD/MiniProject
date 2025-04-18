@@ -51,6 +51,8 @@ export default function Dashboard() {
     }
   };
 
+  
+
   const captureScreenshot = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
