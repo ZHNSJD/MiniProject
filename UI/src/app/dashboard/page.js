@@ -52,6 +52,9 @@ export default function Dashboard() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
 
     // Add checks for readiness
     if (!video || !canvas || video.readyState < video.HAVE_CURRENT_DATA) {
@@ -71,6 +74,7 @@ export default function Dashboard() {
       canvas.height = video.videoHeight;
 
       // 1. Draw the current video frame to the canvas
+<<<<<<< HEAD
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // 2. Get the ImageData object
@@ -83,18 +87,29 @@ export default function Dashboard() {
       const ctx = canvas.getContext("2d");
       
       // Draw the current video frame to the canvas
+=======
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Convert the captured image to grayscale
+
+      // 2. Get the ImageData object
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+<<<<<<< HEAD
       const pixels = imageData.data;
   
 >>>>>>> zahaan/API
+=======
+      const pixels = imageData.data; // This is a Uint8ClampedArray: [R, G, B, A, R, G, B, A, ...]
+
+      // 3. Iterate through each pixel and apply grayscale formula
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
       for (let i = 0; i < pixels.length; i += 4) {
         const r = pixels[i];     // Red
         const g = pixels[i + 1]; // Green
         const b = pixels[i + 2]; // Blue
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
         // Alpha (pixels[i + 3]) is ignored for calculation but preserved
 
         // Calculate grayscale value using the luminosity method (Rec. 709)
@@ -107,6 +122,7 @@ export default function Dashboard() {
         pixels[i + 1] = gray; // Green
         pixels[i + 2] = gray; // Blue
         // pixels[i + 3] remains the original alpha value (usually 255)
+<<<<<<< HEAD
       }
 
       // 5. Put the modified ImageData back onto the canvas
@@ -131,17 +147,29 @@ export default function Dashboard() {
   
         // Set all three RGB values to the grayscale value
         pixels[i] = pixels[i + 1] = pixels[i + 2] = gray;
+=======
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
       }
-  
-      // Put the modified image back onto the canvas
+
+      // 5. Put the modified ImageData back onto the canvas
       ctx.putImageData(imageData, 0, 0);
-  
-      // Return the grayscale image as a data URL
-      return canvas.toDataURL("image/jpeg");
+
+      // 6. Return the grayscale image as a data URL
+      // Specify quality for JPEG to control size/performance if needed
+      return canvas.toDataURL("image/jpeg", 0.9); // Quality 0.9 (adjust as needed)
+
+    } catch (err) {
+       console.error("Error during canvas drawing or grayscale conversion:", err);
+       // Optionally display an error to the user or handle it further
+       // setErrorMessage("Could not process image frame."); // If you have an error state
+       return null; // Return null on error
     }
-    return null;
   };
+<<<<<<< HEAD
 >>>>>>> zahaan/API
+=======
+
+>>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
   
 
   const handleSendMessage = async () => {
