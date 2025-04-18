@@ -41,7 +41,7 @@ def generate_chatbot_response(user_input: str, detected_emotion: str) -> str:
         ],
         response_mime_type="text/plain",
         system_instruction=[
-            types.Part.from_text(text="""Adjust responses based on detected emotions but do not explicitly mention the emotion unless the user does.
+            types.Part.from_text(text="""Adjust responses based on detected emotions but do not explicitly mention the emotion.
 
 Response Behavior:
 - Sad → Offer comfort and reassurance.
@@ -67,4 +67,10 @@ Bot: "I am here. You are not alone. What is on your mind?"
     # Generate response
     response = client.models.generate_content(model=model, contents=contents, config=generate_content_config)
 
-    return response.text.strip()  # Return response as a string
+    # Safely handle None response
+    if response is None:
+        return "Sorry, I couldn't generate a response (no response from Gemini API)."
+    text = getattr(response, 'text', None)
+    if text is None:
+        return "Sorry, I couldn't generate a response for that request."
+    return text.strip()
