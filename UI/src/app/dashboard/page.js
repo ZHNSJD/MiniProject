@@ -13,13 +13,16 @@ export default function Dashboard() {
   const [input, setInput] = useState("");
   const videoRef = useRef(null);
   const chatEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
     const fetchUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error);
+        return;
+      }
       if (user) {
         setUser(user);
         const { data } = await supabase.storage.from("avatars").download(`${user.id}/avatar`);
@@ -51,10 +54,6 @@ export default function Dashboard() {
   const captureScreenshot = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
 
     // Add checks for readiness
     if (!video || !canvas || video.readyState < video.HAVE_CURRENT_DATA) {
@@ -74,7 +73,6 @@ export default function Dashboard() {
       canvas.height = video.videoHeight;
 
       // 1. Draw the current video frame to the canvas
-<<<<<<< HEAD
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // 2. Get the ImageData object
@@ -82,34 +80,10 @@ export default function Dashboard() {
       const pixels = imageData.data; // This is a Uint8ClampedArray: [R, G, B, A, R, G, B, A, ...]
 
       // 3. Iterate through each pixel and apply grayscale formula
-=======
-    if (video && canvas) {
-      const ctx = canvas.getContext("2d");
-      
-      // Draw the current video frame to the canvas
-=======
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // 2. Get the ImageData object
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-<<<<<<< HEAD
-      const pixels = imageData.data;
-  
->>>>>>> zahaan/API
-=======
-      const pixels = imageData.data; // This is a Uint8ClampedArray: [R, G, B, A, R, G, B, A, ...]
-
-      // 3. Iterate through each pixel and apply grayscale formula
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
       for (let i = 0; i < pixels.length; i += 4) {
         const r = pixels[i];     // Red
         const g = pixels[i + 1]; // Green
         const b = pixels[i + 2]; // Blue
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
         // Alpha (pixels[i + 3]) is ignored for calculation but preserved
 
         // Calculate grayscale value using the luminosity method (Rec. 709)
@@ -122,7 +96,6 @@ export default function Dashboard() {
         pixels[i + 1] = gray; // Green
         pixels[i + 2] = gray; // Blue
         // pixels[i + 3] remains the original alpha value (usually 255)
-<<<<<<< HEAD
       }
 
       // 5. Put the modified ImageData back onto the canvas
@@ -139,38 +112,6 @@ export default function Dashboard() {
        return null; // Return null on error
     }
   };
-
-=======
-        
-        // Calculate grayscale value
-        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
-  
-        // Set all three RGB values to the grayscale value
-        pixels[i] = pixels[i + 1] = pixels[i + 2] = gray;
-=======
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
-      }
-
-      // 5. Put the modified ImageData back onto the canvas
-      ctx.putImageData(imageData, 0, 0);
-
-      // 6. Return the grayscale image as a data URL
-      // Specify quality for JPEG to control size/performance if needed
-      return canvas.toDataURL("image/jpeg", 0.9); // Quality 0.9 (adjust as needed)
-
-    } catch (err) {
-       console.error("Error during canvas drawing or grayscale conversion:", err);
-       // Optionally display an error to the user or handle it further
-       // setErrorMessage("Could not process image frame."); // If you have an error state
-       return null; // Return null on error
-    }
-  };
-<<<<<<< HEAD
->>>>>>> zahaan/API
-=======
-
->>>>>>> e1f8c0f1f85b763888b31653797af25a781ae23e
-  
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
@@ -257,7 +198,7 @@ export default function Dashboard() {
             Start chatting
           </Button>
         ) : (
-          <div className="w-full h-80 overflow-y-auto p-4 bg-white/20 rounded-lg" ref={chatContainerRef}>
+          <div className="w-full h-80 overflow-y-auto p-4 bg-white/20 rounded-lg">
             {messages.map((msg, index) => (
               <div key={index} className={`my-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
                 <span className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>

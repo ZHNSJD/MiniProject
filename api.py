@@ -28,8 +28,11 @@ def detect_emotion(image_bytes):
     """Detect emotion from image."""
     nparr = np.frombuffer(image_bytes, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
     image = cv2.resize(image, (48, 48))  # Resize as per your model input
-    image = np.expand_dims(image, axis=0) / 255.0  # Normalize
+    image = np.expand_dims(image, axis=-1)  # Add channel dimension => (48, 48, 1)
+    image = np.expand_dims(image, axis=0)   # Add batch dimension => (1, 48, 48, 1)
+    image = image / 255.0  # Normalize
 
     prediction = model.predict(image)
     detected_emotion = emotion_labels[np.argmax(prediction)]
