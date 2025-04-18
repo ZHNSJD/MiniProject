@@ -4,17 +4,22 @@ from google.genai import types
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path='ui/.env.local')
+load_dotenv(verbose=True, override=True)
 
-print(f"GEMINI_API_KEY: {os.getenv('GEMINI_API_KEY')}")
+# Keep this print statement temporarily for verification
+print(f"--- Verifying Key Load --- GEMINI_API_KEY: {os.getenv('GEMINI_API_KEY')}")
 
 
 def generate_chatbot_response(user_input: str, detected_emotion: str) -> str:
     """Generate chatbot response based on user input and detected emotion."""
-
+# Define a dictionary to map emotions to chatbot responses
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+         # Raise a specific error if the key is still missing after loading
+         raise ValueError("GEMINI_API_KEY environment variable not found or empty.")
     # Initialize Google Gemini API client
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    model = "gemini-2.5-pro-exp-03-25"
+    client = genai.Client(api_key=api_key)
+    model = "gemini-2.0-flash-thinking-exp-01-21"
 
     # Format the input with detected emotion
     formatted_input = f"Emotion: {detected_emotion}\nUser: {user_input}"
