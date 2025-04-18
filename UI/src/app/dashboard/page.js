@@ -51,6 +51,7 @@ export default function Dashboard() {
   const captureScreenshot = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+<<<<<<< HEAD
 
     // Add checks for readiness
     if (!video || !canvas || video.readyState < video.HAVE_CURRENT_DATA) {
@@ -77,10 +78,23 @@ export default function Dashboard() {
       const pixels = imageData.data; // This is a Uint8ClampedArray: [R, G, B, A, R, G, B, A, ...]
 
       // 3. Iterate through each pixel and apply grayscale formula
+=======
+    if (video && canvas) {
+      const ctx = canvas.getContext("2d");
+      
+      // Draw the current video frame to the canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert the captured image to grayscale
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+  
+>>>>>>> zahaan/API
       for (let i = 0; i < pixels.length; i += 4) {
         const r = pixels[i];     // Red
         const g = pixels[i + 1]; // Green
         const b = pixels[i + 2]; // Blue
+<<<<<<< HEAD
         // Alpha (pixels[i + 3]) is ignored for calculation but preserved
 
         // Calculate grayscale value using the luminosity method (Rec. 709)
@@ -110,6 +124,24 @@ export default function Dashboard() {
     }
   };
 
+=======
+        
+        // Calculate grayscale value
+        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+  
+        // Set all three RGB values to the grayscale value
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = gray;
+      }
+  
+      // Put the modified image back onto the canvas
+      ctx.putImageData(imageData, 0, 0);
+  
+      // Return the grayscale image as a data URL
+      return canvas.toDataURL("image/jpeg");
+    }
+    return null;
+  };
+>>>>>>> zahaan/API
   
 
   const handleSendMessage = async () => {
