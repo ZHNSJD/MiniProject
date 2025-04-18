@@ -1,3 +1,4 @@
+// src/app/signup/page.js (or wherever your signup component is located)
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
@@ -36,22 +37,24 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // Check if the user already exists using Supabase Auth
-      const { data: user, error: getUserError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      // Call API to check if the user already exists
+      const response = await fetch("/api/check_user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: formData.email }),
       });
 
-      if (user) {
-        setError("User already registered with this email.");
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        setError(data.message);
         setIsLoading(false);
         return;
       }
-      if (getUserError && getUserError.message !== "Invalid login credentials") {
-        throw getUserError;
-      }
 
-      // Proceed to sign up if user doesn't exist
+      // Proceed to sign up if the user doesn't exist
       const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,

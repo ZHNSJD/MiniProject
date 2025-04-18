@@ -9,11 +9,15 @@ export default function Dashboard() {
   const [isChatting, setIsChatting] = useState(false);
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const videoRef = useRef(null);
   const chatEndRef = useRef(null);
+  const dropdownRef = useRef(null);
   const canvasRef = useRef(null);
+  
+
 
   useEffect(() => {
     setIsClient(true);
@@ -162,6 +166,23 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
+  
+  const toggleDropdown = () => setShowDropdown((prev) => !prev);
+  
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
   if (!isClient) return null;
 
   return (
@@ -177,9 +198,16 @@ export default function Dashboard() {
             src={avatarUrl} 
             alt="Profile" 
             className="w-12 h-12 rounded-full cursor-pointer" 
+            onClick={toggleDropdown} 
           />
         ) : (
           <div className="w-12 h-12 bg-gray-400 rounded-full cursor-pointer"></div>
+        )}
+        {showDropdown && (
+          <div ref={dropdownRef} className="absolute top-14 right-0 w-32 bg-white rounded-lg shadow-lg">
+            <Link href="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</Link>
+            <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</button>
+          </div>
         )}
       </div>
 
