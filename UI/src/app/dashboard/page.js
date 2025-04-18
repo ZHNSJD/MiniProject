@@ -16,23 +16,23 @@ export default function Dashboard() {
   const chatEndRef = useRef(null);
   const dropdownRef = useRef(null);
   const canvasRef = useRef(null);
-  
-
 
   useEffect(() => {
     setIsClient(true);
     const fetchUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error("Error fetching user:", error);
-        return;
-      }
-      if (user) {
-        setUser(user);
-        const { data } = await supabase.storage.from("avatars").download(`${user.id}/avatar`);
-        if (data) {
-          setAvatarUrl(URL.createObjectURL(data));
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error fetching user:", error);
+          return;
         }
+        if (user) {
+          setUser(user);
+          // Try to fetch the avatar after setting user
+          fetchAvatar(user.id);
+        }
+      } catch (err) {
+        console.error("Error in user fetch process:", err);
       }
     };
     fetchUser();
@@ -46,6 +46,30 @@ export default function Dashboard() {
       .catch((err) => console.error("Error accessing webcam:", err));
   }, []);
 
+  const fetchAvatar = async (userId) => {
+    try {
+      // Simple direct download attempt with proper error handling
+      const { data, error } = await supabase
+        .storage
+        .from("avatars")
+        .download(`${userId}/avatar`);
+      
+      if (error) {
+        // This is expected for new users with no avatar
+        console.log("No avatar found or error:", error.message);
+        return;
+      }
+      
+      if (data) {
+        // Successfully downloaded avatar
+        const url = URL.createObjectURL(data);
+        setAvatarUrl(url);
+      }
+    } catch (err) {
+      console.error("Avatar fetch failed:", err);
+    }
+  };
+
   const handleStartChatting = () => {
     setIsChatting(true);
     if (user) {
@@ -54,8 +78,6 @@ export default function Dashboard() {
       setMessages([welcomeMessage]);
     }
   };
-
-  
 
   const captureScreenshot = () => {
     const video = videoRef.current;
@@ -171,7 +193,9 @@ export default function Dashboard() {
     window.location.href = "/login";
   };
   
-  const toggleDropdown = () => setShowDropdown((prev) => !prev);
+  const toggleDropdown = () => {
+    setShowDropdown((prev) => !prev);
+  }
   
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -183,6 +207,15 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
+  // Clean up object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (avatarUrl) {
+        URL.revokeObjectURL(avatarUrl);
+      }
+    };
+  }, [avatarUrl]);
+  
   if (!isClient) return null;
 
   return (
@@ -192,21 +225,37 @@ export default function Dashboard() {
     >
       <h1 className="absolute top-8 text-5xl font-bold text-white">Soulwave</h1>
 
-      <div className="absolute top-4 right-4 flex gap-3 items-center">
-        {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
-            alt="Profile" 
-            className="w-12 h-12 rounded-full cursor-pointer" 
-            onClick={toggleDropdown} 
-          />
-        ) : (
-          <div className="w-12 h-12 bg-gray-400 rounded-full cursor-pointer"></div>
-        )}
+      <div className="absolute top-4 right-4 flex gap-3 items-center z-10">
+        <div 
+          className="w-12 h-12 rounded-full cursor-pointer overflow-hidden border-2 border-white/50"
+          onClick={toggleDropdown}
+        >
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+        </div>
+        
         {showDropdown && (
-          <div ref={dropdownRef} className="absolute top-14 right-0 w-32 bg-white rounded-lg shadow-lg">
-            <Link href="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</Link>
-            <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</button>
+          <div ref={dropdownRef} className="absolute top-14 right-0 w-40 bg-white/90 backdrop-blur-md rounded-lg shadow-lg py-2">
+            <Link href="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition">
+              Profile Settings
+            </Link>
+            <button 
+              onClick={handleLogout} 
+              className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition"
+            >
+              Logout
+            </button>
           </div>
         )}
       </div>
@@ -247,6 +296,7 @@ export default function Dashboard() {
               value={input} 
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
             <Button onClick={handleSendMessage} className="bg-blue-500 rounded-r-lg">Send</Button>
           </div>
