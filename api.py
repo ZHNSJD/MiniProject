@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import cv2
@@ -22,7 +21,7 @@ app.add_middleware(
 model = tf.keras.models.load_model(r"C:\Users\sidha\OneDrive\Desktop\Mini Project\MiniProject\stress_emotion_model_v2.h5") #Change path to your path
 
 # Define emotion labels (modify based on your model)
-emotion_labels = ["happy", "sad", "angry", "neutral", "fearful", "disgust", "surprised"]
+emotion_labels = ['anger', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
 def detect_emotion(image_bytes):
     """Detect emotion from image."""
