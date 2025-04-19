@@ -1,38 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Emotion Detection and Chatbot Assistant
 
-## Getting Started
+This project is a real-time Emotion Detection system with an intelligent chatbot assistant. It captures video input from the user, analyzes emotions periodically, and provides personalized responses or stress-reducing recommendations using Google's Gemini API.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🔥 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🎥 Real-time **Webcam-based Emotion Detection**
+- 🧠 Emotion classification using pre-trained ML models
+- 🤖 **Chatbot integration** for contextual responses
+- 💬 Gemini-powered suggestions for:
+  - Stress reduction
+  - Song or activity recommendations
+- 📸 Periodic screenshot capture (every 3–5 seconds)
+- 📡 FastAPI backend + Next.js frontend
+- 🔐 `.env`-based API key management
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧩 Tech Stack
 
-## Learn More
+| Area         | Tools/Frameworks         |
+|--------------|--------------------------|
+| Frontend     | Next.js (React + JS)     |
+| Backend      | FastAPI                  |
+| ML/Emotion   | Python, OpenCV           |
+| Chatbot API  | Google Gemini API        |
+| Styling      | Tailwind CSS             |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Sample Workflow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **User visits frontend and allows webcam access.**
+2. **Video is captured**, and frames are periodically sent to the backend for emotion analysis.
+3. **Emotion is detected** from the video frames and passed to the **chatbot API** for personalized interaction.
+4. **Gemini responds** with personalized suggestions based on the detected emotion (e.g., stress reduction techniques or song/activity recommendations).
+5. **UI updates** with the chatbot's feedback, providing the user with the suggested response.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧪 Future Improvements
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 🎯 **Audio-based emotion detection**
+- 📊 **Dashboard for emotion trends**
+- 🧬 **Sentiment analysis from text input**
+- 🌐 **Multi-language support**
 
-lol
+## ✨ Contributors
+
+- **Shreya Nithin** 
+- **Sidharth** 
+- **Vivek** 
+- **Zahaan** 
