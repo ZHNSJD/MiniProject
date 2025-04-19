@@ -2,9 +2,11 @@ import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables from .env file
-load_dotenv(verbose=True, override=True)
+env_path = Path(__file__).resolve().parent / "UI" / ".env.local"
+load_dotenv(dotenv_path=env_path, verbose=True, override=True)
 
 # Keep this print statement temporarily for verification
 print(f"--- Verifying Key Load --- GEMINI_API_KEY: {os.getenv('GEMINI_API_KEY')}")
