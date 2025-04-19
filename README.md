@@ -49,6 +49,6 @@ This project is a real-time Emotion Detection system with an intelligent chatbot
 ## ✨ Contributors
 
 - **Shreya Nithin** 
-- **Sidharth** 
-- **Vivek** 
-- **Zahaan** 
+- **Sidharth V S** 
+- **Vivek V Joseph** 
+- **Zahaan Sajid** 
