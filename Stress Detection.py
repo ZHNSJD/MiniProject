@@ -88,11 +88,16 @@ def load_trained_model():
     return load_model("stress_emotion_model_v2.h5")
 
 # Function to detect emotion from an image
-def detect_emotion(image_path):
+def detect_emotion(image_bytes):
     model = load_trained_model()
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-    image = cv2.imread(image_path)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # image = cv2.imread(image_path)
+
+    np_array = np.frombuffer(image_bytes, np.uint8)
+    image = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
+
+    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = image
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
     
     for (x, y, w, h) in faces:
@@ -124,7 +129,13 @@ def provide_recommendation(emotion):
 
 # Example usage
 image_path = r"C:\Users\OMEN\Downloads\disgustingshit.jpeg"  # Replace with an actual image path
-detected_emotion = detect_emotion(image_path)
+# detected_emotion = detect_emotion(image_path)
+
+with open(image_path, "rb") as img_file:
+    image_bytes = img_file.read()
+
+detected_emotion = detect_emotion(image_bytes)
+
 recommendation = provide_recommendation(detected_emotion)
 
 print(f"Detected Emotion: {detected_emotion}")
