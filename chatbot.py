@@ -23,6 +23,7 @@ def generate_chatbot_response(user_input: str, detected_emotion: str) -> str:
 
     # Format the input with detected emotion
     formatted_input = f"Emotion: {detected_emotion}\nUser: {user_input}"
+    #print("---Input---",formatted_input) #Uncomment to check input
 
     contents = [
         types.Content(
@@ -66,6 +67,7 @@ Bot: "I am here. You are not alone. What is on your mind?"
 
     # Generate response
     response = client.models.generate_content(model=model, contents=contents, config=generate_content_config)
+    #print("---Gemini Response---",response) #Uncomment to check output
 
     # Safely handle None response
     if response is None:
